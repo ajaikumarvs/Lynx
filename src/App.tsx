@@ -1,7 +1,8 @@
 // src/App.tsx
 import { useState } from 'react'
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import './App.css'
+import { ArrowLeft, ArrowRight, RotateCcw, Home } from 'lucide-react'
 
 interface Tab {
   id: string;
@@ -15,11 +16,10 @@ function App() {
     { id: '1', url: 'about:blank', title: 'New Tab', isActive: true }
   ]);
   const [currentUrl, setCurrentUrl] = useState('');
-
+  
   const handleNavigate = async (url: string) => {
     try {
       await invoke('navigate_to', { url });
-      // Update the current tab's URL
       setTabs(prevTabs => 
         prevTabs.map(tab => 
           tab.isActive ? { ...tab, url } : tab
@@ -55,6 +55,7 @@ function App() {
 
   return (
     <div className="browser-container">
+      {/* Tab Bar at top */}
       <div className="browser-tabs">
         {tabs.map(tab => (
           <div 
@@ -66,7 +67,7 @@ function App() {
               );
             }}
           >
-            <span>{tab.title}</span>
+            <span className="tab-title">{tab.title}</span>
             <button 
               className="close-tab"
               onClick={(e) => {
@@ -81,8 +82,28 @@ function App() {
         <button className="new-tab" onClick={handleNewTab}>+</button>
       </div>
       
+      {/* Main Content Area */}
+      <div className="browser-content">
+        {/* Browser view will be rendered here */}
+      </div>
+      
+      {/* Navigation Bar at bottom */}
       <div className="browser-toolbar">
-        <form onSubmit={handleSubmit}>
+        <div className="nav-buttons">
+          <button className="nav-button" onClick={() => invoke('go_back')}>
+            <ArrowLeft size={20} />
+          </button>
+          <button className="nav-button" onClick={() => invoke('go_forward')}>
+            <ArrowRight size={20} />
+          </button>
+          <button className="nav-button" onClick={() => invoke('refresh')}>
+            <RotateCcw size={20} />
+          </button>
+          <button className="nav-button" onClick={() => handleNavigate('about:home')}>
+            <Home size={20} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="url-form">
           <input
             type="text"
             className="url-input"
@@ -91,10 +112,6 @@ function App() {
             placeholder="Enter URL or search terms"
           />
         </form>
-      </div>
-      
-      <div className="browser-content">
-        {/* Browser view will be rendered here */}
       </div>
     </div>
   )
